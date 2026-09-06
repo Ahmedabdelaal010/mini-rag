@@ -1,9 +1,27 @@
 from fastapi import FastAPI
 from routes import base , data
+from motor.motor_asyncio import AsynIOMotrClient
+from helper.config import get_settings
 
 
 
 app = FastAPI()
+
+@app.on_event("startup")    # when the app is startup
+async def startup_db_client():
+    settings = get_settings()
+
+    app.mongo_conn = AsynIOMotrClient( settings.MONGODB_URL )
+    app.db_client = app.mongo_conn[settings.MONGODB_DATABASE]
+
+
+@app.on_event("shutdown")    # when you want to shutdown just before it close the connection
+async def shutdown_db_client():
+    app.mongo_conn.close()    
+
+
 app.include_router(base.base_router)
 app.include_router(data.data_router)
+
+
 
