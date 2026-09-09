@@ -3,9 +3,9 @@ from typing import Optional
 from bson.objectid import ObjectId
 
 
-class project(BaseModel):
+class Project(BaseModel):
     
-    _id: Otional[ObjectId]      # _id : this default parameter built-in schemas
+    id: Optional[ObjectId] = Field(default=None , alias="_id")      # _id : this default parameter built-in schemas
     project_id : str = Field(..., min_length=1)
 
 
@@ -18,5 +18,3 @@ class project(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True        
-
-
