@@ -28,6 +28,7 @@ class GroqProvider(LLMInterface):
         self.client = Groq(
             api_key=self.api_key
         )
+        self.enums = GroqEnums
 
         self.logger = logging.getLogger(__name__)
 
@@ -51,33 +52,27 @@ class GroqProvider(LLMInterface):
     def generate_text(
         self,
         prompt: str,
-        chat_history: list = [],
+        chat_history: list = None,
         max_output_tokens: int = None,
         temperature: float = None
-    ):
+):
 
         if not self.client:
-
             self.logger.error("Groq client was not set")
-
             return None
-
 
         if not self.generation_model_id:
-
-            self.logger.error(
-                "Generation model for Groq was not set"
-            )
-
+            self.logger.error("Generation model for Groq was not set")
             return None
 
+        if chat_history is None:
+            chat_history = []
 
         max_output_tokens = (
             max_output_tokens
-            if max_output_tokens
+            if max_output_tokens is not None
             else self.default_generation_max_ouput_tokens
         )
-
 
         temperature = (
             temperature
@@ -85,22 +80,21 @@ class GroqProvider(LLMInterface):
             else self.default_genertion_temperature
         )
 
+        messages = chat_history.copy()
 
-        chat_history.append(
+        messages.append(
             self.construct_prompt(
                 prompt=prompt,
                 role=GroqEnums.USER.value
             )
         )
 
-
         response = self.client.chat.completions.create(
             model=self.generation_model_id,
-            messages=chat_history,
+            messages=messages,
             max_tokens=max_output_tokens,
             temperature=temperature
         )
-
 
         if (
             not response
@@ -108,15 +102,14 @@ class GroqProvider(LLMInterface):
             or len(response.choices) == 0
             or not response.choices[0].message
         ):
-
             self.logger.error(
                 "Error while generating text with Groq"
             )
-
             return None
 
+        answer = response.choices[0].message.content
 
-        return response.choices[0].message.content
+        return answer
 
 
     def embed_text(

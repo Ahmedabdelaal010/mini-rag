@@ -12,8 +12,8 @@ class CoHereProvider(LLMInterface):
                         default_genertion_temperature: float=0.1):
 
 
-        self.api_key = self.api_key
-        self.api_url = self.api_url
+        self.api_key = api_key
+
 
         self.default_input_max_characters = default_input_max_characters 
         self.default_generation_max_ouput_tokens = default_generation_max_ouput_tokens
@@ -27,6 +27,7 @@ class CoHereProvider(LLMInterface):
 
         self.client = cohere.Client(api_key=self.api_key)  
 
+        self.enums = CoHereEnums
         self.logger = logging.getLogger(__name__)
 
 
@@ -80,7 +81,7 @@ class CoHereProvider(LLMInterface):
             self.logger.error("Embedding model for CoHere was not set")      
             return None
 
-        input_type = CoHereEnums.Document    # by deafault with document type is document , if user wants to use query then he can set it to query and we will use that in the embedding function of cohere api.
+        input_type = CoHereEnums.DOCUMENT    # by deafault with document type is document , if user wants to use query then he can set it to query and we will use that in the embedding function of cohere api.
         if document_type == DocumentTypeEnum.QUERY:
             input_type = CoHereEnums.QUERY
 

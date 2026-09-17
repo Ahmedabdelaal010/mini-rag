@@ -1,9 +1,10 @@
 from enum import Enum 
 
-class LLMEnum(Enum):
+class LLMEnums(Enum):
 
     OPENAI = "OPENAI"
     COHERE = "COHERE"
+    GROQ = "GROQ"
 
 
 class OpenAIEnums(Enum):
@@ -17,8 +18,8 @@ class CoHereEnums(Enum):
 
     SYSTEM = "SYSTEM"
     USER = "USER"
-    ASSISTANT = "ASSISTANT"
-
+    ASSISTANT = "CHATBOT"
+    
     DOCUMENT = "search_document"
     QUERY = "search_query"
 
