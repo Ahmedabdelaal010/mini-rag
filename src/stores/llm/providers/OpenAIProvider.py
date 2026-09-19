@@ -67,7 +67,7 @@ class OpenAIProvider(LLMInterface):
             model = self.generation_model_id ,
             messages = chat_history ,
             max_tokens = max_output_tokens ,
-            temprature = temperature
+            temperature = temperature
         )
 
         if not response or not response.choices or len(response.choices) == 0 or not response.choices[0].message:
