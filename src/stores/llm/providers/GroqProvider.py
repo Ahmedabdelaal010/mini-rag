@@ -131,5 +131,5 @@ class GroqProvider(LLMInterface):
 
         return {
             "role": role,
-            "content": self.process_text(prompt)
+            "content": prompt
         }
