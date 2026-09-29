@@ -21,10 +21,10 @@ services :
 
 
   pgvector:
-    image: pgvector/pgvector:0.8.6-pg18-trixie
+    image: pgvector/pgvector:0.8.0-pg17
     container_name: pgvector
     ports:
-      - "5432:5432"   # postgres works on by default on 5432 port 
+      - "5433:5432"   # postgres works on by default on 5432 port 
     volumes:
       - pgvector_data:/var/lib/postgresql/data
     environment:

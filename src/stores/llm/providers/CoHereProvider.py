@@ -2,6 +2,7 @@ from ..LLMInterface import LLMInterface
 from ..LLMEnums import CoHereEnums , DocumentTypeEnum
 import cohere 
 import logging
+from typing import List, Union
 
 
 class CoHereProvider(LLMInterface):
@@ -71,33 +72,90 @@ class CoHereProvider(LLMInterface):
 
         return response.text
 
-    def embed_text(self, text: str , document_type: str=None):
+    # def embed_text(self, text: Union[str,List[str]] , document_type: str=None):
+
+    #     if not self.client:
+    #         self.logger.error("CoHere client was not set")
+    #         return None 
+
+    #     if isinstance(text, str):
+    #         text = [text]
+
+    #     if not self.embedding_model_id:
+    #         self.logger.error("Embedding model for CoHere was not set")      
+    #         return None
+
+    #     input_type = CoHereEnums.DOCUMENT    # by deafault with document type is document , if user wants to use query then he can set it to query and we will use that in the embedding function of cohere api.
+    #     if document_type == DocumentTypeEnum.QUERY:
+    #         input_type = CoHereEnums.QUERY
+
+    #     response = self.client.embed(
+    #         model=self.embedding_model_id,
+    #         texts=[self.process_text(t) for t in text],
+    #         input_type=input_type,
+    #         embedding_types=['float'],
+    #     )   
+
+    #     if not response or not response.embeddings or not response.embeddings.float:
+    #         self.logger.error("Error while embedding text with CoHere")
+    #         return None
+
+    #     return [ f for f in response.embeddings.float]
+
+
+    def embed_text(
+    self,
+    text: Union[str, List[str]],
+    document_type: str = None
+):
 
         if not self.client:
             self.logger.error("CoHere client was not set")
-            return None 
-
-        if not self.embedding_model_id:
-            self.logger.error("Embedding model for CoHere was not set")      
             return None
 
-        input_type = CoHereEnums.DOCUMENT    # by deafault with document type is document , if user wants to use query then he can set it to query and we will use that in the embedding function of cohere api.
+        if isinstance(text, str):
+            text = [text]
+
+        if not self.embedding_model_id:
+            self.logger.error("Embedding model for CoHere was not set")
+            return None
+
+        input_type = CoHereEnums.DOCUMENT
+
         if document_type == DocumentTypeEnum.QUERY:
             input_type = CoHereEnums.QUERY
 
-        response = self.client.embed(
-            model = self.embedding_model_id,
-            texts = [self.process_text(text)],
-            input_type = input_type,
-            embedding_types = ['float'],
-        )   
+        batch_size = 50
+        all_embeddings = []
 
-        if not response or not response.embeddings or not response.embeddings.float:
-            self.logger.error("Error while embedding text with CoHere")
-            return None
+        for i in range(0, len(text), batch_size):
 
-        return response.embeddings.float[0]
+            batch_texts = text[i:i + batch_size]
 
+            self.logger.info(
+                f"Cohere Embedding: {i}/{len(text)}"
+            )
+
+            response = self.client.embed(
+                model=self.embedding_model_id,
+                texts=[self.process_text(t) for t in batch_texts],
+                input_type=input_type,
+                embedding_types=["float"],
+            )
+
+            if (
+                not response
+                or not response.embeddings
+                or not response.embeddings.float
+            ):
+                self.logger.error(
+                    f"Error while embedding batch starting at {i}"
+                )
+                return None
+
+            all_embeddings.extend(response.embeddings.float)
+
+        return all_embeddings
 
 
     def construct_prompt(self, prompt: str , role: str):
