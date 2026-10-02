@@ -3,6 +3,8 @@ from ..LLMEnums import CoHereEnums , DocumentTypeEnum
 import cohere 
 import logging
 from typing import List, Union
+import time
+
 
 
 class CoHereProvider(LLMInterface):
@@ -125,7 +127,7 @@ class CoHereProvider(LLMInterface):
         if document_type == DocumentTypeEnum.QUERY:
             input_type = CoHereEnums.QUERY
 
-        batch_size = 50
+        batch_size = 10
         all_embeddings = []
 
         for i in range(0, len(text), batch_size):
@@ -136,27 +138,71 @@ class CoHereProvider(LLMInterface):
                 f"Cohere Embedding: {i}/{len(text)}"
             )
 
-            response = self.client.embed(
-                model=self.embedding_model_id,
-                texts=[self.process_text(t) for t in batch_texts],
-                input_type=input_type,
-                embedding_types=["float"],
-            )
+            max_retries = 5
 
-            if (
-                not response
-                or not response.embeddings
-                or not response.embeddings.float
-            ):
+            for attempt in range(max_retries):
+
+                try:
+
+                    response = self.client.embed(
+                        model=self.embedding_model_id,
+                        texts=[
+                            self.process_text(t)
+                            for t in batch_texts
+                        ],
+                        input_type=input_type,
+                        embedding_types=["float"],
+                    )
+
+                    if (
+                        not response
+                        or not response.embeddings
+                        or not response.embeddings.float
+                    ):
+                        self.logger.error(
+                            f"Error while embedding batch starting at {i}"
+                        )
+                        return None
+
+                    all_embeddings.extend(
+                        response.embeddings.float
+                    )
+
+                    # successful request
+                    time.sleep(2)
+
+                    break
+
+                except cohere.errors.TooManyRequestsError as e:
+
+                    wait_time = 10 * (2 ** attempt)
+
+                    self.logger.warning(
+                        f"Cohere rate limit reached. "
+                        f"Retry {attempt + 1}/{max_retries} "
+                        f"after {wait_time} seconds."
+                    )
+
+                    time.sleep(wait_time)
+
+                except Exception as e:
+
+                    self.logger.error(
+                        f"Cohere embedding error: {e}"
+                    )
+
+                    return None
+
+            else:
+
                 self.logger.error(
-                    f"Error while embedding batch starting at {i}"
+                    f"Failed to embed batch starting at {i} "
+                    f"after {max_retries} retries."
                 )
+
                 return None
 
-            all_embeddings.extend(response.embeddings.float)
-
         return all_embeddings
-
 
     def construct_prompt(self, prompt: str , role: str):
 

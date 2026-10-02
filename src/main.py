@@ -7,7 +7,13 @@ from stores.llm.templates.template_parser import TemplateParser
 from sqlalchemy.ext.asyncio import create_async_engine , AsyncSession
 from sqlalchemy.orm import sessionmaker
 
+# Import metrics setup
+from utils.metrics import setup_metrics
+
 app = FastAPI()
+
+# Setup Prometheusmetrics
+setup_metrics(app)
 
 # @app.on_event("startup")    # when the app is startup
 async def startup_span():
