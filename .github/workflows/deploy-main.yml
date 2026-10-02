@@ -5,7 +5,7 @@ on:
     branches:
       - main
 
-jops:
+jobs:
   deploy:
     runs-on: ubuntu-latest
 
@@ -19,7 +19,7 @@ jops:
           host: ${{ secrets.SSH_MAIN_HOST_IP }}
           username: github_user
           key: ${{ secrets.SSH_MAIN_PRIVATE_KEY }} 
-          script: 
+          script: |
             cd /home/github_user/workspace/mini-rag
             git checkout main
             git pull
