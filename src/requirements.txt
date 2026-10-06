@@ -16,7 +16,7 @@ httpx==0.27.0
 SQLAlchemy==2.0.36
 asyncpg==0.30.0
 alembic==1.14.0
-psycopg2==2.9.10
+psycopg2-binary==2.9.10
 pgvector==0.4.0
 nltk==3.9.1
 
@@ -26,3 +26,10 @@ starlette-exporter==0.17.0
 
 # Health checks
 fastapi-health==0.4.0 
+
+# Task Queue and Background Processing
+celery==5.5.3
+redis==6.2.0
+kombu==5.5.4
+billiard==4.2.1
+vine==5.1.0
