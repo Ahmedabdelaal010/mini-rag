@@ -151,7 +151,7 @@ async def _process_project_files(task_instance, project_id: int , file_id: int ,
         task_instance.update_state(
             state='SUCCESS',
             meta={
-                "signal": ResponseSignal.NO_FILES_ERROR.value
+                "signal": ResponseSignal.PROCESSING_SUCCESS.value
             }
         )
 
@@ -161,7 +161,9 @@ async def _process_project_files(task_instance, project_id: int , file_id: int ,
         return {
             "signal": ResponseSignal.PROCESSING_SUCCESS.value,
             "inserted_chunks": no_records,
-            "processed_files": no_files
+            "processed_files": no_files,
+            "project_id" : project_id,
+            "do_reset" : do_reset
         }
 
     except Exception as e :
