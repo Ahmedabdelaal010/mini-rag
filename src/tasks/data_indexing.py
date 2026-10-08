@@ -42,7 +42,7 @@ async def _index_data_content(task_instance,  project_id: int, do_reset: int):
             db_client = db_client
         )
 
-        project = await project_model.get_project_or_Create_one(
+        project = await project_model.get_project_or_create_one(
             project_id = project_id
         )
 

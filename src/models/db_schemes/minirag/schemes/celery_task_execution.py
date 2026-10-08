@@ -9,7 +9,7 @@ class CeleryTaskExecution(SQLAlchemyBase):
 
     __tablename__ = "celery_task_executions"
 
-    exection_id = Column(Integer, primary_key=True , autoincrement=True)
+    execution_id = Column(Integer, primary_key=True , autoincrement=True)
 
     task_name = Column(String(255) , nullable=False)
     task_args_hash = Column(String(64), nullable=False)            # SHA-256 hash of task arguments

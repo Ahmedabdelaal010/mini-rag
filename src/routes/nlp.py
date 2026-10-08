@@ -42,7 +42,7 @@ async def get_project_index_info(request: Request, project_id: int):
         db_client = request.app.db_client 
     )
     
-    project = await project_model.get_project_or_Create_one(
+    project = await project_model.get_project_or_create_one(
         project_id = project_id
     )
 
@@ -69,7 +69,7 @@ async def search_index(request: Request, project_id: int , search_request: Searc
         db_client = request.app.db_client 
     )
         
-    project = await project_model.get_project_or_Create_one(
+    project = await project_model.get_project_or_create_one(
         project_id = project_id
     )
     
@@ -106,7 +106,7 @@ async def search_index(request: Request, project_id: int , search_request: Searc
         db_client = request.app.db_client 
     )
         
-    project = await project_model.get_project_or_Create_one(
+    project = await project_model.get_project_or_create_one(
         project_id = project_id
     )
     
