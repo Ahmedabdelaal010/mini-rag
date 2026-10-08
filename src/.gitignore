@@ -3,6 +3,12 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+#update .gitignore
+src/assets/database/
+src/assets/files/
+assets/database/
+assets/files/
+
 # C extensions
 *.so
 
@@ -218,3 +224,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Runtime data
+assets/database/
+assets/files/
