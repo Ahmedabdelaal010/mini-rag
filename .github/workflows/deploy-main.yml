@@ -3,7 +3,7 @@ name: Deploy Main Branch to Server
 on:
   push:
     branches:
-      - main
+      - tut-017
 
 jobs:
   deploy:
