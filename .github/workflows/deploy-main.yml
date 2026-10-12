@@ -1,3 +1,51 @@
+# name: Deploy Main Branch to Server
+
+# on:
+#   push:
+#     branches:
+#       - tut-017
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: Deploy via SSH
+#         uses: appleboy/ssh-action@v1.2.2
+#         with:
+#           host: ${{ secrets.SSH_MAIN_HOST_IP }}
+#           username: ubuntu
+#           key: ${{ secrets.SSH_MAIN_PRIVATE_KEY }} 
+#           script: |
+#             cd /home/github_user/workspace/mini-rag
+#             git checkout main
+#             git pull
+#             sudo systemctl restart minirag.service
+#             echo "Wating..."
+#             sleep 20
+
+#             for i in {1..6}; do
+#               if ss -tuln | grep -q ':80'; then
+#                   echo "✅ Port 80 is now active."
+#                   break
+#               else
+#                   echo "⏳ Port 80 not ready yet. Retrying in 5 seconds..."
+#                   sleep 5
+#               fi
+#             done
+
+#             if ! ss -tuln | grep -q ':80'; then
+#                 echo "❌ Service failed to start on port 80"
+#                 exit 1
+#             fi
+
+
+
+
+
 name: Deploy Main Branch to Server
 
 on:
@@ -20,24 +68,23 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_MAIN_PRIVATE_KEY }} 
           script: |
-            cd /home/github_user/workspace/mini-rag
-            git checkout main
-            git pull
+            set -e
+
+            sudo -u github_user git -C /home/github_user/workspace/mini-rag fetch origin tut-017
+            sudo -u github_user git -C /home/github_user/workspace/mini-rag checkout tut-017
+            sudo -u github_user git -C /home/github_user/workspace/mini-rag pull --ff-only origin tut-017
+
+            sudo systemctl daemon-reload
             sudo systemctl restart minirag.service
-            echo "Wating..."
+
+            echo "Waiting for service..."
             sleep 20
 
-            for i in {1..6}; do
-              if ss -tuln | grep -q ':80'; then
-                  echo "✅ Port 80 is now active."
-                  break
-              else
-                  echo "⏳ Port 80 not ready yet. Retrying in 5 seconds..."
-                  sleep 5
-              fi
-            done
+            sudo systemctl is-active --quiet minirag.service
 
-            if ! ss -tuln | grep -q ':80'; then
-                echo "❌ Service failed to start on port 80"
-                exit 1
+            if ! curl -fsS --max-time 5 http://127.0.0.1/ > /dev/null; then
+              echo "Application HTTP health check failed"
+              exit 1
             fi
+
+            echo "Deployment completed successfully."
